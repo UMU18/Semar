@@ -9,15 +9,13 @@ DATABASE_URL = os.environ['https://data.heroku.com/datastores/7f5c6592-8985-46d0
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 @app.route('/hello') #whenever this webserver is called with <hostname:port>/hello then this section is called
-def hello(): #The subroutine name that handles the call
+def hello():
 	show = "SELECT * FROM data_latih"
-    cur = conn.cursor()
-    cur.execute(show)
+	cur = conn.cursor()
+	cur.execute(show)
 	row = cur.fetchone()
 	print(cur.rowcount)
-	#output = 'Hello World'
-	#return output #Whatever is returned from this subroutine is what is returned to the requester and is shown on the browser page
-
+	
 if __name__ == '__main__':
 	port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
 	app.run(host='0.0.0.0', port=port)  #Start listening
