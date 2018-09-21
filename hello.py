@@ -107,7 +107,7 @@ def index():
 				return_arr.append(dicti)
 		except BaseException as inst:
 			error = str(type(inst).__name__) + ' ' + str(inst)
-	return arr_message
+	return jsonify(arr_message)
 	
 
 if __name__ == '__main__':
