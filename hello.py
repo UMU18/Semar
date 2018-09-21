@@ -4,7 +4,7 @@ import psycopg2
 
 app = Flask(__name__) #create an instance of the Flask library
 
-DATABASE_URL = os.environ['DATABASE_URL']
+DATABASE_URL = os.environ['data.heroku.com/datastores/7f5c6592-8985-46d0-a0c0-6791409c61f0']
 
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
