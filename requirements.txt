@@ -2,3 +2,7 @@ Flask==0.12.3
 psycopg2-binary==2.7.5
 pandas==0.23.4
 sqlalchemy==1.2.12
+scikit-learn==0.19.1
+bs4==4.6.0
+sastrawi==1.0.1
+
