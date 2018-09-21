@@ -76,38 +76,25 @@ Vectorizer = TfidfVectorizer()
 vectorize_text = Vectorizer.fit_transform(y)
 Classifier.fit(vectorize_text, x)
 
-@app.route('/', methods=['GET']) #whenever this webserver is called with <hostname:port>/hello then this section is called
+@app.route('/', methods=['GET'])
 def index():
-	arr_message = request.args.getlist('message')
-	
-	error = ''
-	predict_proba = ''
-	predict = ''
+	message = request.args.get('message', '')
+    error = ''
+    predict_proba = ''
+    predict = ''
 
-	global Classifier
-	global Vectorizer
-
-	return_arr = []
-	for message in arr_message:
-		try:
-			if len(message) > 0:
-				a=stripTagsAndUris(message)
-				b=removePunctuation(a)
-				c=removeStopwords(b)
-				d=stemming(c)
-				vectorize_message = Vectorizer.transform([d])
-				predict = Classifier.predict(vectorize_message)[0]
-				predict_proba = Classifier.predict_proba(vectorize_message).tolist()
-				dicti = {}
-				dicti['message'] = message
-				dicti['predict'] = predict
-				dicti['predict_proba'] = predict_proba
-				dicti['error']      = error
-
-				return_arr.append(dicti)
-		except BaseException as inst:
-			error = str(type(inst).__name__) + ' ' + str(inst)
-	return jsonify(arr_message)
+    global Classifier
+    global Vectorizer
+    try:
+        if len(message) > 0:
+          vectorize_message = Vectorizer.transform([message])
+          predict = Classifier.predict(vectorize_message)[0]
+          predict_proba = Classifier.predict_proba(vectorize_message).tolist()
+    except BaseException as inst:
+        error = str(type(inst).__name__) + ' ' + str(inst)
+    return jsonify(
+              message=message, predict_proba=predict_proba,
+              predict=predict, error=error)
 	
 
 if __name__ == '__main__':
