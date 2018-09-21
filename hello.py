@@ -1,19 +1,20 @@
 import os
 from flask import Flask, request
 import psycopg2
+import pandas as pd
 
 app = Flask(__name__) #create an instance of the Flask library
 
 DATABASE_URL = os.environ['DATABASE_URL']
-
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 @app.route('/hello') #whenever this webserver is called with <hostname:port>/hello then this section is called
 def hello():
-	cur = conn.cursor()
-	cur.execute("SELECT * FROM data_latih;")
-	raw = cur.fetchone()
-	return raw[1]
+	df = pd.read_sql_table("data_latih", conn)
+	#cur = conn.cursor()
+	#cur.execute("SELECT * FROM data_latih;")
+	#raw = cur.fetchone()
+	return df
 	
 
 if __name__ == '__main__':
