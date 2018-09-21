@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.multiclass import *
 from sklearn.svm import *
+from sklearn import svm
 from bs4 import BeautifulSoup
 import re
 import string
@@ -72,7 +73,7 @@ df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(r
 x = df.iloc[:,0] 
 y = df.iloc[:,1] 
 
-Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
+Classifier = svm.SVC()
 Vectorizer = TfidfVectorizer()
 vectorize_text = Vectorizer.fit_transform(y)
 Classifier.fit(vectorize_text, x)
