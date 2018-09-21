@@ -12,7 +12,7 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 def hello():
 	cur = conn.cursor()
 	cur.execute("SELECT * FROM data_latih;")
-	return cur.fetchone()
+	return cur
 
 	
 if __name__ == '__main__':
