@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+import numpy as np
 
 app = Flask(__name__) #create an instance of the Flask library
 
@@ -80,7 +81,7 @@ Classifier.fit(vectorize_text, x)
 def index():
 	message = request.args.get('message', '')
 	error = ''
-	predict_proba = ''
+	predict_proba = np.array([])
 	predict = ''
 
 	global Classifier
@@ -89,7 +90,7 @@ def index():
 		if len(message) > 0:
 			vectorize_message = Vectorizer.transform([message])
 			predict = Classifier.predict(vectorize_message)[0]
-			predict_proba = Classifier.predict_proba(vectorize_message)
+			predict_proba = Classifier.predict_proba(vectorize_message).tolist()
 	except BaseException as inst:
 		error = str(type(inst).__name__) + ' ' + str(inst)
 	return jsonify( 
