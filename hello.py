@@ -10,10 +10,13 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 @app.route('/hello') #whenever this webserver is called with <hostname:port>/hello then this section is called
 def hello():
-	cur = conn.cursor()
-	cur.execute("SELECT * FROM data_latih;")
-	raw = cur.fetchone()
-	print (raw)
+	if conn!=Null:
+		cur = conn.cursor()
+		cur.execute("SELECT * FROM data_latih;")
+		raw = cur.fetchone()
+		return raw
+	else :
+		return 'llallalalala'
 
 	
 if __name__ == '__main__':
