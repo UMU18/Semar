@@ -17,7 +17,7 @@ def hello():
 	#cur = conn.cursor()
 	#cur.execute("SELECT * FROM data_latih;")
 	#raw = cur.fetchone()
-	return df
+	return df['label']
 	
 
 if __name__ == '__main__':
