@@ -79,23 +79,20 @@ Classifier.fit(vectorize_text, x)
 @app.route('/', methods=['GET'])
 def index():
 	message = request.args.get('message', '')
-    error = ''
-    predict_proba = ''
-    predict = ''
+	error = ''
+	predict_proba = ''
+	predict = ''
 
-    global Classifier
-    global Vectorizer
-    try:
-        if len(message) > 0:
-          vectorize_message = Vectorizer.transform([message])
-          predict = Classifier.predict(vectorize_message)[0]
-          predict_proba = Classifier.predict_proba(vectorize_message).tolist()
-    except BaseException as inst:
-        error = str(type(inst).__name__) + ' ' + str(inst)
-    return jsonify(
-              message=message, predict_proba=predict_proba,
-              predict=predict, error=error)
-	
+	global Classifier
+	global Vectorizer
+	try:
+		if len(message) > 0:
+			vectorize_message = Vectorizer.transform([message])
+			predict = Classifier.predict(vectorize_message)[0]
+			predict_proba = Classifier.predict_proba(vectorize_message).tolist()
+	except BaseException as inst:
+		error = str(type(inst).__name__) + ' ' + str(inst)
+	return jsonify( message=message, predict_proba=predict_proba, predict=predict, error=error)
 
 if __name__ == '__main__':
 		port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
