@@ -11,8 +11,8 @@ conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 @app.route('/hello') #whenever this webserver is called with <hostname:port>/hello then this section is called
 def hello():
 	cur = conn.cursor()
-	cur.execute("INSERT INTO data_latih (label,term) VALUES (%s,%s)",("notsafe","sedang berusaha insert data"))
-	return "sukses"
+	cur.execute("SELECT * FROM data_latih;")
+	return cur.fetchone()
 
 	
 if __name__ == '__main__':
