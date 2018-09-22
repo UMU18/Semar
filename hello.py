@@ -94,7 +94,7 @@ def index():
 			predict_proba = Classifier.predict_proba(vectorize_message).tolist()
 	except BaseException as inst:
 		error = str(type(inst).__name__) + ' ' + str(inst)
-	return jsonify( predictproba=predict_proba )
+	return jsonify(message=message, predict_proba=predict_proba, predict=predict, error=error)
 
 if __name__ == '__main__':
 		port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
