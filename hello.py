@@ -109,6 +109,33 @@ def index():
 			error = str(type(inst).__name__) + ' ' + str(inst)
 	return jsonify(return_arr)
 
+@app.route('/', methods=['POST'])
+def Create_Data():
+	json = {
+	'predict': request.json['predict'],
+	'message': request.json['message']}
+
+	data = pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
+	for index, row in data.iterrows():
+		if row["term"] == json['message'] and row["label"] != json['predict']:
+			status = 'inconsisten'
+			break
+		elif row["term"] == json['message'] and row["label"] == json['predict']:
+			status = 'duplicate'
+			break
+		else:
+			status = 'not exist'
+	print(status)
+	if status == 'inconsisten':
+		delete_str = "DELETE FROM data_latih WHERE term = %s"
+		cur = con.cursor()
+		cur.execute(delete_str, (json['message'],))
+		con.commit()
+	if status == 'not exist':
+		dataInsert = pd.DataFrame({'label':[json['predict']],'term':[json['message']]})
+		dataInsert.to_sql('data_latih', engine, if_exists='append',index=False)
+	return jsonify(json), 201
+
 if __name__ == '__main__':
 		port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
 		app.run(host='0.0.0.0', port=port)  #Start listening
