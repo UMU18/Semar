@@ -73,7 +73,7 @@ df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(r
 x = df.iloc[:,0] 
 y = df.iloc[:,1] 
 
-Classifier = svm.SVC(probability=True)
+Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
 Vectorizer = TfidfVectorizer()
 vectorize_text = Vectorizer.fit_transform(y)
 Classifier.fit(vectorize_text, x)
