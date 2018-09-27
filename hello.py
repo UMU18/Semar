@@ -1,13 +1,25 @@
 import os
-from flask import Flask, request
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+import time
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 
-app = Flask(__name__) #create an instance of the Flask library
+app = Flask(__name__)
 
-@app.route('/hello') #whenever this webserver is called with <hostname:port>/hello then this section is called
-def hello(): #The subroutine name that handles the call
-	output = 'Hello World'
-	return output #Whatever is returned from this subroutine is what is returned to the requester and is shown on the browser page
+def print_date_time():
+    print(time.strftime("%A, %d. %B %Y %I:%M:%S %p"))
+
+
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
+
+@app.route('/')
+def index():
+    return "YOU GOT IT"
 
 if __name__ == '__main__':
-	port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
-	app.run(host='0.0.0.0', port=port)  #Start listening
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=print_date_time, trigger="interval", seconds=10)
+    scheduler.start()
+    port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
+    app.run(debug=True, host='0.0.0.0', port=port)
