@@ -137,9 +137,9 @@ def Create_Data():
 	print(status)
 	if status == 'inconsisten':
 		delete_str = "DELETE FROM data_latih WHERE term = %s"
-		cur = con.cursor()
+		cur = conn.cursor()
 		cur.execute(delete_str, (json['message'],))
-		con.commit()
+		conn.commit()
 	if status == 'not exist':
 		dataInsert = pd.DataFrame({'label':[json['predict']],'term':[json['message']]})
 		dataInsert.to_sql('data_latih', engine, if_exists='append',index=False)
