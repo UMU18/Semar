@@ -9,8 +9,6 @@ from bs4 import BeautifulSoup
 import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-import time
-import atexit
 import pickle
 
 
