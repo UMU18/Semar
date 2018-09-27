@@ -1,1 +1,2 @@
-web: python hello.py 
+web: python hello.py
+clock: python hello.py
