@@ -11,7 +11,6 @@ import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import time
 import atexit
-from apscheduler.schedulers.background import BackgroundScheduler
 import pickle
 
 
@@ -82,9 +81,6 @@ def learning():
 
 learning()
 
-# Shut down the scheduler when exiting the app
-atexit.register(lambda: scheduler.shutdown())
-
 @app.route('/', methods=['GET'])
 def index():
 	arr_message = request.args.getlist('message')
@@ -145,7 +141,4 @@ def Create_Data():
 	return jsonify(json), 201
 
 if __name__ == '__main__':
-	scheduler = BackgroundScheduler()
-	scheduler.add_job(func=learning, trigger="cron", hour=8, minute=45)
-	scheduler.start()
-	app.run(debug=True, use_reloader=False)
+	app.run()
