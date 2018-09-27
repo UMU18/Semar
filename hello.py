@@ -4,7 +4,8 @@ import psycopg2
 from sqlalchemy import create_engine
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import svm
+from sklearn.multiclass import *
+from sklearn.svm import *
 from bs4 import BeautifulSoup
 import re
 import string
@@ -64,7 +65,7 @@ def removeStopwords(x):
 
 
 #perform learning
-Classifier = svm.SVC(probability=True)
+Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
 Vectorizer = TfidfVectorizer()
 
 df = pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
