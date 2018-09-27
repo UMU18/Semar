@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-import pickle
 
 
 app = Flask(__name__) #create an instance of the Flask library
@@ -68,16 +67,12 @@ def removeStopwords(x):
 Classifier = svm.SVC(probability=True)
 Vectorizer = TfidfVectorizer()
 
-def learning():
-    df = pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
-    df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
-    x = df.iloc[:,0] 
-    y = df.iloc[:,1] 
-    vectorize_text = Vectorizer.fit_transform(y)
-    Classifier.fit(vectorize_text, x)
-    pickle.dump(Classifier, open('finalized_model.pkl', 'wb'))
-
-learning()
+df = pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
+df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
+x = df.iloc[:,0] 
+y = df.iloc[:,1] 
+vectorize_text = Vectorizer.fit_transform(y)
+Classifier.fit(vectorize_text, x)
 
 @app.route('/', methods=['GET'])
 def index():
@@ -98,9 +93,8 @@ def index():
 				c=removeStopwords(b)
 				d=stemming(c)
 				vectorize_message = Vectorizer.transform([d])
-				loaded_model = pickle.load(open('finalized_model.pkl', 'rb'))
-				predict = loaded_model.predict(vectorize_message)[0]
-				predict_proba = loaded_model.predict_proba(vectorize_message).tolist()
+				predict = Classifier.predict(vectorize_message)[0]
+				predict_proba = Classifier.predict_proba(vectorize_message).tolist()
 				dicti = {}
 				dicti['message'] = message
 				dicti['predict'] = predict
