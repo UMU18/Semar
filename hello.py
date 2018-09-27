@@ -100,8 +100,8 @@ def index():
 				d=stemming(c)
 				vectorize_message = Vectorizer.transform([d])
 				loaded_model = pickle.load(open('finalized_model.pkl', 'rb'))
-                predict = loaded_model.predict(vectorize_message)[0]
-                predict_proba = loaded_model.predict_proba(vectorize_message).tolist()
+				predict = loaded_model.predict(vectorize_message)[0]
+				predict_proba = loaded_model.predict_proba(vectorize_message).tolist()
 				dicti = {}
 				dicti['message'] = message
 				dicti['predict'] = predict
