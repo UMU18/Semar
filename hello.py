@@ -6,26 +6,25 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.multiclass import *
 from sklearn.svm import *
-from sklearn import svm
 from bs4 import BeautifulSoup
 import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-import numpy as np
+import time
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
+import pickle
+
 
 app = Flask(__name__) #create an instance of the Flask library
 
 global Classifier
 global Vectorizer
 
-factory = StemmerFactory()
-stemmer = factory.create_stemmer()
-
+#make connection
 DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
 engine = create_engine(os.environ['DATABASE_URL'])
-df = pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
 
 #remove URI
 uri_re = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
@@ -54,6 +53,9 @@ def removePunctuation(x):
     return re.sub("["+string.punctuation+"]", " ", x)
 
 #stemming
+factory = StemmerFactory()
+stemmer = factory.create_stemmer()
+
 def stemming(x):
     return stemmer.stem(x)
 
@@ -66,17 +68,23 @@ def removeStopwords(x):
     return " ".join(filtered_words)
 
 
-#perform prepocessing
-df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
-
-# train model
-x = df.iloc[:,0] 
-y = df.iloc[:,1] 
-
+#perform learning
 Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
 Vectorizer = TfidfVectorizer()
-vectorize_text = Vectorizer.fit_transform(y)
-Classifier.fit(vectorize_text, x)
+
+def learning():
+    df = pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
+    df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
+    x = df.iloc[:,0] 
+    y = df.iloc[:,1] 
+    vectorize_text = Vectorizer.fit_transform(y)
+    Classifier.fit(vectorize_text, x)
+    pickle.dump(Classifier, open('finalized_model.pkl', 'wb'))
+
+learning()
+
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
 
 @app.route('/', methods=['GET'])
 def index():
@@ -97,8 +105,9 @@ def index():
 				c=removeStopwords(b)
 				d=stemming(c)
 				vectorize_message = Vectorizer.transform([d])
-				predict = Classifier.predict(vectorize_message)[0]
-				predict_proba = Classifier.predict_proba(vectorize_message).tolist()
+				loaded_model = pickle.load(open('finalized_model.pkl', 'rb'))
+				predict = loaded_model.predict(vectorize_message)[0]
+				predict_proba = loaded_model.predict_proba(vectorize_message).tolist()
 				dicti = {}
 				dicti['message'] = message
 				dicti['predict'] = predict
@@ -137,5 +146,7 @@ def Create_Data():
 	return jsonify(json), 201
 
 if __name__ == '__main__':
-		port = int(os.environ.get('PORT', 5000)) #The port to be listening to — hence, the URL must be <hostname>:<port>/ inorder to send the request to this program
-		app.run(host='0.0.0.0', port=port)  #Start listening
+	scheduler = BackgroundScheduler()
+	scheduler.add_job(func=learning, trigger="cron", hour=8, minute=45)
+	scheduler.start()
+	app.run(debug=True, use_reloader=False)
