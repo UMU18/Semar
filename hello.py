@@ -11,6 +11,9 @@ import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import pickle
+import time
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 app = Flask(__name__) #create an instance of the Flask library
@@ -80,6 +83,9 @@ def learning():
 
 learning()
 
+# Shut down the scheduler when exiting the app
+atexit.register(lambda: scheduler.shutdown())
+
 @app.route('/', methods=['GET'])
 def index():
 	arr_message = request.args.getlist('message')
@@ -140,5 +146,8 @@ def Create_Data():
 	return jsonify(json), 201
 
 if __name__ == '__main__':
+	scheduler = BackgroundScheduler()
+    scheduler.add_job(func=learning, trigger="cron", hour=3, minute=5)
+    scheduler.start()
 	port = int(os.environ.get('PORT', 5000))
 	app.run(debug=True, use_reloader=False, host='0.0.0.0', port=port)
