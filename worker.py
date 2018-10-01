@@ -8,6 +8,8 @@ import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import pickle
+import psycopg2
+from sqlalchemy import create_engine
 
 global Classifier
 global Vectorizer
