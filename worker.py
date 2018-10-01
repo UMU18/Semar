@@ -68,7 +68,7 @@ def learning():
     df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
     x = df.iloc[:,0] 
     y = df.iloc[:,1] 
-    Vectorizer.fit_transform(y)
+    vectorize_text = Vectorizer.fit_transform(y)
     Classifier.fit(vectorize_text, x)
     pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
     pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
