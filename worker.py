@@ -16,7 +16,6 @@ global Vectorizer
 
 #make connection
 DATABASE_URL = os.environ['DATABASE_URL']
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 engine = create_engine(os.environ['DATABASE_URL'])
 
 #remove URI
@@ -69,9 +68,10 @@ def learning():
     df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
     x = df.iloc[:,0] 
     y = df.iloc[:,1] 
-    vectorize_text = Vectorizer.fit_transform(y)
+    Vectorizer.fit_transform(y)
     Classifier.fit(vectorize_text, x)
     pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
     pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
+    print("learning sucess")
 
 learning()
