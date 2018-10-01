@@ -72,6 +72,7 @@ def learning():
     Classifier.fit(vectorize_text, x)
     pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
     pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
-    print("learning sucess")
+    tail=df.tail()
+    print(tail)
 
 learning()
