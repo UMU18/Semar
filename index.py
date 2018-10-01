@@ -4,6 +4,8 @@ import psycopg2
 from sqlalchemy import create_engine
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.multiclass import *
+from sklearn.svm import *
 from bs4 import BeautifulSoup
 import re
 import string
@@ -18,9 +20,8 @@ DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 engine = create_engine(os.environ['DATABASE_URL'])
 
+global Classifier
 global Vectorizer
-
-Vectorizer = TfidfVectorizer()
 
 #remove URI
 uri_re = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
@@ -63,6 +64,19 @@ def removeStopwords(x):
     filtered_words = [word for word in x.split() if word not in stopword]
     return " ".join(filtered_words)
 
+Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
+Vectorizer = TfidfVectorizer()
+def learning():
+    print("learning start.....")
+    df= pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
+    df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
+    x = df.iloc[:,0] 
+    y = df.iloc[:,1] 
+    vectorize_text = Vectorizer.fit_transform(y)
+    Classifier.fit(vectorize_text, x)
+    pickle.dump(Classifier, open('finalized_model.pkl', 'wb'))
+    
+learning()
 @app.route('/', methods=['GET'])
 def index():
 	arr_message = request.args.getlist('message')
