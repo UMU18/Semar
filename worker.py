@@ -1,3 +1,4 @@
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.multiclass import *
 from sklearn.svm import *
