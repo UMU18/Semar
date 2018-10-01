@@ -5,9 +5,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import re
 import string
-from sklearn.model_selection import train_test_split
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-import csv
 import pickle
 
 global Classifier

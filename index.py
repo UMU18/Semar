@@ -3,6 +3,11 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import psycopg2
 from sqlalchemy import create_engine
 import pickle
+import pandas as pd
+from bs4 import BeautifulSoup
+import re
+import string
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 
 
