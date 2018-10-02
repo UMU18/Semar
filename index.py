@@ -73,11 +73,18 @@ def index():
 				b=removePunctuation(a)
 				c=removeStopwords(b)
 				d=stemming(c)
-				loaded_vectorizer = pickle.load(open('finalized_vectorizer.pkl', 'rb'))
-				loaded_classifier = pickle.load(open('finalized_classifier.pkl', 'rb'))
-				vectorize_message = loaded_vectorizer.transform([d])
-				predict = loaded_classifier.predict(vectorize_message)[0]
-				predict_proba = loaded_classifier.predict_proba(vectorize_message).tolist()
+
+				select_str="SELECT trainedmodel FROM model WHERE ID=%s"
+				cur = conn.cursor()
+				cur.execute(select_str, (0))
+				row=cur.fetchone()
+				unpickling=[]
+				for un in row:
+					unpickling.append(un)
+				loadmodel=pickle.loads(b"".join(unpickling))
+				vectorize_message = loadmodel.transform([d])
+				predict = loadmodel.predict(vectorize_message)[0]
+				predict_proba = loadmodel.predict_proba(vectorize_message).tolist()
 				dicti = {}
 				dicti['message'] = message
 				dicti['predict'] = predict

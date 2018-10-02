@@ -11,12 +11,15 @@ import pickle
 import psycopg2
 from sqlalchemy import create_engine
 import time
+from sklearn.pipeline import Pipeline
+
 
 global Classifier
 global Vectorizer
 
 #make connection
 DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 engine = create_engine(os.environ['DATABASE_URL'])
 
 #remove URI
@@ -61,8 +64,10 @@ def removeStopwords(x):
     return " ".join(filtered_words)
 
 #perform learning
-Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
-Vectorizer = TfidfVectorizer()
+pipe = Pipeline([  
+  ('tfidf', TfidfVectorizer()),
+  ('classify', OneVsRestClassifier(SVC(kernel='linear', probability=True)))
+  ])
 
 start=time.time()
 print("learning start.....")
@@ -70,10 +75,17 @@ df= pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
 df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
 x = df.iloc[:,0]
 y = df.iloc[:,1]
-vectorize_text = Vectorizer.fit_transform(y)
-Classifier.fit(vectorize_text, x)
-pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
-pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
-end=time.time()
+models=pipe.fit(y, x)
+model=pickle.dumps(models)
+insert_str = "INSERT INTO model (trainedmodel) values (%s)"
+update_str = "UPDATE model SET trainedmodel=%s where ID=%s"
+cur = con.cursor()
+cur.execute("SELECT * from model")
+msq=cur.fetchone()
+if not msq:
+    cur.execute(insert_str, (model))
+else:
+    cur.execute(update_str,(model, 0))
+con.commit()
 execute_time=end-start
 print("learning finish in "+str(execute_time)+" second")
