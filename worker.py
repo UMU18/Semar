@@ -76,4 +76,4 @@ pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
 pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
 end=time.time()
 execute_time=end-start
-print("learning finish in "+execute_time+" second")
+print("learning finish in "+str(execute_time)+" second")
