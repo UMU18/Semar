@@ -83,7 +83,7 @@ cur = conn.cursor()
 cur.execute("SELECT * from model")
 msq=cur.fetchone()
 if not msq:
-    cur.execute(insert_str, (model))
+    cur.execute(insert_str, (model,))
 else:
     cur.execute(update_str,(model, 0))
 con.commit()
