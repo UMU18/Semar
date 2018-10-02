@@ -79,7 +79,7 @@ models=pipe.fit(y, x)
 model=pickle.dumps(models)
 insert_str = "INSERT INTO model (trainedmodel) values (%s)"
 update_str = "UPDATE model SET trainedmodel=%s where ID=%s"
-cur = con.cursor()
+cur = conn.cursor()
 cur.execute("SELECT * from model")
 msq=cur.fetchone()
 if not msq:
