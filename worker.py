@@ -10,6 +10,7 @@ from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import pickle
 import psycopg2
 from sqlalchemy import create_engine
+import time
 
 global Classifier
 global Vectorizer
@@ -62,17 +63,17 @@ def removeStopwords(x):
 #perform learning
 Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
 Vectorizer = TfidfVectorizer()
-def learning():
-    print("learning start.....")
-    df= pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
-    df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
-    x = df.iloc[:,0] 
-    y = df.iloc[:,1] 
-    vectorize_text = Vectorizer.fit_transform(y)
-    Classifier.fit(vectorize_text, x)
-    pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
-    pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
-    tail=df.tail()
-    print(tail)
 
-learning()
+start=time.time()
+print("learning start.....")
+df= pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
+df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
+x = df.iloc[:,0]
+y = df.iloc[:,1]
+vectorize_text = Vectorizer.fit_transform(y)
+Classifier.fit(vectorize_text, x)
+pickle.dump(Vectorizer, open('finalized_vectorizer.pkl', 'wb'))
+pickle.dump(Classifier, open('finalized_classifier.pkl', 'wb'))
+end=time.time()
+execute_time=end-start
+print("learning finish in "+execute_time+" second")
