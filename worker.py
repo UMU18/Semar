@@ -87,5 +87,6 @@ if not msq:
 else:
     cur.execute(update_str,(model, 0))
 conn.commit()
+end= time.time()
 execute_time=end-start
 print("learning finish in "+str(execute_time)+" second")
