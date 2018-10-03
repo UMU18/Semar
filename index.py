@@ -75,7 +75,7 @@ def index():
 
 			global Vectorizer
 
-			select_model="SELECT classifier FROM model"
+			select_model="SELECT trainedmodel FROM model"
 			cur = conn.cursor()
 			cur.execute(select_model)
 			raw=cur.fetchone()
