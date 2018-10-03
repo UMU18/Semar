@@ -71,9 +71,10 @@ def index():
 			c=removeStopwords(b)
 			d=stemming(c)
 
+			id=0
 			select_str="SELECT trainedmodel FROM model WHERE ID=%s"
 			cur = conn.cursor()
-			cur.execute(select_str, (0))
+			cur.execute(select_str, ([id]))
 			row=cur.fetchone()
 			unpickling=[]
 			for un in row:
