@@ -60,40 +60,32 @@ def removeStopwords(x):
     
 @app.route('/', methods=['GET'])
 def index():
-	arr_message = request.args.getlist('message')
+	message = request.args.get('message')
 	error = ''
 	predict_proba = ''
 	predict = ''
+	try:
+		if len(message) > 0:
+			a=stripTagsAndUris(message)
+			b=removePunctuation(a)
+			c=removeStopwords(b)
+			d=stemming(c)
 
-	return_arr = []
-	for message in arr_message:
-		try:
-			if len(message) > 0:
-				a=stripTagsAndUris(message)
-				b=removePunctuation(a)
-				c=removeStopwords(b)
-				d=stemming(c)
-
-				select_str="SELECT trainedmodel FROM model WHERE ID=%s"
-				cur = conn.cursor()
-				cur.execute(select_str, (0))
-				row=cur.fetchone()
-				unpickling=[]
-				for un in row:
-					unpickling.append(un)
-				loadmodel=pickle.loads(b"".join(unpickling))
-				vectorize_message = loadmodel.transform([d])
-				predict = loadmodel.predict(vectorize_message)[0]
-				predict_proba = loadmodel.predict_proba(vectorize_message).tolist()
-				dicti = {}
-				dicti['message'] = message
-				dicti['predict'] = predict
-				dicti['predict_proba'] = predict_proba
-				dicti['error']      = error
-				return_arr.append(dicti)
-		except BaseException as inst:
-			error = str(type(inst).__name__) + ' ' + str(inst)
-	return jsonify(return_arr)
+			select_str="SELECT trainedmodel FROM model WHERE ID=%s"
+			cur = conn.cursor()
+			cur.execute(select_str, (0))
+			row=cur.fetchone()
+			unpickling=[]
+			for un in row:
+				unpickling.append(un)
+			loadmodel=pickle.loads(b"".join(unpickling))
+			vectorize_message = loadmodel.transform([d])
+			predict = loadmodel.predict(vectorize_message)[0]
+			predict_proba = loadmodel.predict_proba(vectorize_message).tolist()
+	except BaseException as inst:
+		error = str(type(inst).__name__) + ' ' + str(inst)
+	return jsonify(message=message, predict_proba=predict_proba,
+              predict=predict, error=error)
 
 @app.route('/', methods=['POST'])
 def Create_Data():
