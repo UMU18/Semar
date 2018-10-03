@@ -81,7 +81,7 @@ def index():
 			raw=cur.fetchone()
 			unpickling_model=[]
 			for unpickling in raw:
-				unpickling_model.append(unclassy)
+				unpickling_model.append(unpickling)
 			loadmodel=pickle.loads(b"".join(unpickling_model))
 			vectorize_message = Vectorizer.transform([d])
 			predict = loadmodel.predict(vectorize_message)[0]
