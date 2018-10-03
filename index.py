@@ -59,39 +59,47 @@ def removeStopwords(x):
 
 @app.route('/', methods=['GET'])
 def index():
-	message = request.args.get('message')
+	arr_message = request.args.getlist('message')
 	error = ''
 	predict_proba = ''
 	predict = ''
-	try:
-		if len(message) > 0:
-			a=stripTagsAndUris(message)
-			b=removePunctuation(a)
-			c=removeStopwords(b)
-			d=stemming(c)
 
-			select_vectorizer="SELECT vectorizer FROM model"
-			select_classifier="SELECT classifier FROM model"
-			cur = conn.cursor()
-			cur.execute(select_vectorizer)
-			vectorizer=cur.fetchone()
-			unpickling_vectorizer=[]
-			for unvect in vectorizer:
-				unpickling_vectorizer.append(unvect)
-			cur.execute(select_classifier)
-			classifier=cur.fetchone()
-			unpickling_classifier=[]
-			for unclassy in classifier:
-				unpickling_classifier.append(unclassy)
-			loadvectorizer=pickle.loads(b"".join(unpickling_vectorizer))
-			loadclassifier=pickle.loads(b"".join(unpickling_classifier))
-			vectorize_message = loadvectorizer.transform([d])
-			predict = loadclassifier.predict(vectorize_message)[0]
-			predict_proba = loadclassifier.predict_proba(vectorize_message).tolist()
-	except BaseException as inst:
-		error = str(type(inst).__name__) + ' ' + str(inst)
-	return jsonify(message=message, predict_proba=predict_proba,
-              predict=predict, error=error)
+	return_arr = []
+	for message in arr_message:
+		try:
+			if len(message) > 0:
+				a=stripTagsAndUris(message)
+				b=removePunctuation(a)
+				c=removeStopwords(b)
+				d=stemming(c)
+
+				select_vectorizer="SELECT vectorizer FROM model"
+				select_classifier="SELECT classifier FROM model"
+				cur = conn.cursor()
+				cur.execute(select_vectorizer)
+				vectorizer=cur.fetchone()
+				unpickling_vectorizer=[]
+				for unvect in vectorizer:
+					unpickling_vectorizer.append(unvect)
+				cur.execute(select_classifier)
+				classifier=cur.fetchone()
+				unpickling_classifier=[]
+				for unclassy in classifier:
+					unpickling_classifier.append(unclassy)
+				loadvectorizer=pickle.loads(b"".join(unpickling_vectorizer))
+				loadclassifier=pickle.loads(b"".join(unpickling_classifier))
+				vectorize_message = loadvectorizer.transform([d])
+				predict = loadclassifier.predict(vectorize_message)[0]
+				predict_proba = loadclassifier.predict_proba(vectorize_message).tolist()
+				dicti = {}
+				dicti['message'] = message
+				dicti['predict'] = predict
+				dicti['predict_proba'] = predict_proba
+				dicti['error']      = error
+				return_arr.append(dicti)
+		except BaseException as inst:
+			error = str(type(inst).__name__) + ' ' + str(inst)
+	return jsonify(return_arr)
 
 @app.route('/', methods=['POST'])
 def Create_Data():
