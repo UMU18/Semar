@@ -71,7 +71,7 @@ def index():
 			c=removeStopwords(b)
 			d=stemming(c)
 
-			id=0
+			id=1
 			select_str="SELECT trainedmodel FROM model WHERE ID=%s"
 			cur = conn.cursor()
 			cur.execute(select_str, ([id]))
