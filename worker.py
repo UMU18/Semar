@@ -64,10 +64,8 @@ def removeStopwords(x):
     return " ".join(filtered_words)
 
 #perform learning
-pipe = Pipeline([  
-  ('tfidf', TfidfVectorizer()),
-  ('classify', OneVsRestClassifier(SVC(kernel='linear', probability=True)))
-  ])
+Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
+Vectorizer = TfidfVectorizer()
 
 start=time.time()
 print("learning start.....")
@@ -75,17 +73,19 @@ df= pd.read_sql_table("data_latih", engine, columns=['label', 'term'])
 df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(removeStopwords)
 x = df.iloc[:,0]
 y = df.iloc[:,1]
-models=pipe.fit(y, x)
-model=pickle.dumps(models)
-insert_str = "INSERT INTO model (trainedmodel) values (%s)"
-update_str = "UPDATE model SET trainedmodel=%s where ID=%s"
+vectorize_text = Vectorizer.fit_transform(y)
+model_classification = Classifier.fit(vectorize_text, x)
+final_model_vector=pickle.dumps(vectorize_text)
+final_model_classification = pickle.dumps(model_classification)
+insert_str = "INSERT INTO model (vectorizer,classifier) values (%s, %s)"
+update_str = "UPDATE model SET vectorizer=%s, classifier=%s where ID=%s"
 cur = conn.cursor()
 cur.execute("SELECT * from model")
 msq=cur.fetchone()
 if not msq:
-    cur.execute(insert_str, (model,))
+    cur.execute(insert_str, (final_model_vector,final_model_classification,))
 else:
-    cur.execute(update_str,(model, 0))
+    cur.execute(update_str,(final_model_vector, final_model_classification,1,))
 conn.commit()
 end= time.time()
 execute_time=end-start

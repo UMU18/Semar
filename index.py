@@ -71,17 +71,24 @@ def index():
 			c=removeStopwords(b)
 			d=stemming(c)
 
-			select_str="SELECT trainedmodel FROM model"
+			select_vect="SELECT vectorizer FROM model"
+			select_classy="SELECT classifier FROM model"
 			cur = conn.cursor()
-			cur.execute(select_str)
-			row=cur.fetchone()
-			unpickling=[]
-			for un in row:
-				unpickling.append(un)
-			loadmodel=pickle.loads(b"".join(unpickling))
-			vectorize_message = loadmodel.transform([d])
-			predict = loadmodel.predict(vectorize_message)[0]
-			predict_proba = loadmodel.predict_proba(vectorize_message).tolist()
+			cur.execute(select_vect)
+			vect=cur.fetchone()
+			unpickling_vect=[]
+			for unvect in vect:
+				unpickling_vect.append(unvect)
+			cur.execute(select_classy)
+			classy=cur.fetchone()
+			unpickling_classy=[]
+			for unclassy in classy:
+				unpickling_classy.append(unclassy)
+			loadvectorizer=pickle.loads(b"".join(unpickling_vect))
+			loadclassifier=pickle.loads(b"".join(unpickling_classy))
+			vectorize_message = loadvectorizer.transform([d])
+			predict = loadclassifier.predict(vectorize_message)[0]
+			predict_proba = loadclassifier.predict_proba(vectorize_message).tolist()
 	except BaseException as inst:
 		error = str(type(inst).__name__) + ' ' + str(inst)
 	return jsonify(message=message, predict_proba=predict_proba,
