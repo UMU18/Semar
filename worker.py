@@ -75,7 +75,7 @@ x = df.iloc[:,0]
 y = df.iloc[:,1]
 vectorize_text = Vectorizer.fit_transform(y)
 model_classification = Classifier.fit(vectorize_text, x)
-final_model_vector=pickle.dumps(vectorize_text)
+final_model_vector=pickle.dumps(Vectorizer)
 final_model_classification = pickle.dumps(model_classification)
 insert_str = "INSERT INTO model (vectorizer,classifier) values (%s, %s)"
 update_str = "UPDATE model SET vectorizer=%s, classifier=%s where ID=%s"
