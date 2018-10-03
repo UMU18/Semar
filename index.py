@@ -17,6 +17,7 @@ DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 engine = create_engine(os.environ['DATABASE_URL'])
 
+global Vectorizer
 #remove URI
 uri_re = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
 
@@ -57,7 +58,8 @@ def removeStopwords(x):
     # Removing all the stopwords
     filtered_words = [word for word in x.split() if word not in stopword]
     return " ".join(filtered_words)
-    
+
+Vectorizer = TfidfVectorizer()
 @app.route('/', methods=['GET'])
 def index():
 	message = request.args.get('message')
@@ -71,24 +73,19 @@ def index():
 			c=removeStopwords(b)
 			d=stemming(c)
 
-			select_vect="SELECT vectorizer FROM model"
-			select_classy="SELECT classifier FROM model"
+			global Vectorizer
+
+			select_model="SELECT classifier FROM model"
 			cur = conn.cursor()
-			cur.execute(select_vect)
-			vect=cur.fetchone()
-			unpickling_vect=[]
-			for unvect in vect:
-				unpickling_vect.append(unvect)
-			cur.execute(select_classy)
-			classy=cur.fetchone()
-			unpickling_classy=[]
-			for unclassy in classy:
-				unpickling_classy.append(unclassy)
-			loadvectorizer=pickle.loads(b"".join(unpickling_vect))
-			loadclassifier=pickle.loads(b"".join(unpickling_classy))
-			vectorize_message = loadvectorizer.transform([d])
-			predict = loadclassifier.predict(vectorize_message)[0]
-			predict_proba = loadclassifier.predict_proba(vectorize_message).tolist()
+			cur.execute(select_model)
+			raw=cur.fetchone()
+			unpickling_model=[]
+			for unpickling in raw:
+				unpickling_model.append(unclassy)
+			loadmodel=pickle.loads(b"".join(unpickling_model))
+			vectorize_message = Vectorizer.transform([d])
+			predict = loadmodel.predict(vectorize_message)[0]
+			predict_proba = loadmodel.predict_proba(vectorize_message).tolist()
 	except BaseException as inst:
 		error = str(type(inst).__name__) + ' ' + str(inst)
 	return jsonify(message=message, predict_proba=predict_proba,
