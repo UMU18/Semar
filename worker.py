@@ -74,17 +74,18 @@ df["term"] = df["term"].apply(stripTagsAndUris).apply(removePunctuation).apply(r
 x = df.iloc[:,0]
 y = df.iloc[:,1]
 vectorize_text = Vectorizer.fit_transform(y)
-model_classification = Classifier.fit(vectorize_text, x)
-final_model = pickle.dumps(model_classification)
-insert_str = "INSERT INTO model (trainedmodel) values (%s)"
-update_str = "UPDATE model SET trainedmodel=%s where ID=%s"
+Classifier.fit(vectorize_text, x)
+model_vectorizer = pickle.dumps(Vectorizer)
+model_classifier = pickle.dumps(Classifier)
+insert_str = "INSERT INTO model (vectorizer, classifier) values (%s, %s)"
+update_str = "UPDATE model SET vectorizer=%s, classifier=%s where ID=%s"
 cur = conn.cursor()
 cur.execute("SELECT * from model")
 msq=cur.fetchone()
 if not msq:
-    cur.execute(insert_str, (final_model,))
+    cur.execute(insert_str, (model_vectorizer, model_classifier,))
 else:
-    cur.execute(update_str,(final_model,1,))
+    cur.execute(update_str,(model_vectorizer, model_classifier, 1))
 conn.commit()
 end= time.time()
 execute_time=end-start

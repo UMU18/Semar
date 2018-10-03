@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 app = Flask(__name__) #create an instance of the Flask library
@@ -17,7 +16,6 @@ DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 engine = create_engine(os.environ['DATABASE_URL'])
 
-global Vectorizer
 #remove URI
 uri_re = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))'
 
@@ -59,7 +57,6 @@ def removeStopwords(x):
     filtered_words = [word for word in x.split() if word not in stopword]
     return " ".join(filtered_words)
 
-Vectorizer = TfidfVectorizer()
 @app.route('/', methods=['GET'])
 def index():
 	message = request.args.get('message')
@@ -73,19 +70,24 @@ def index():
 			c=removeStopwords(b)
 			d=stemming(c)
 
-			global Vectorizer
-
-			select_model="SELECT trainedmodel FROM model"
+			select_vectorizer="SELECT vectorizer FROM model"
+			select_classifier="SELECT classifier FROM model"
 			cur = conn.cursor()
-			cur.execute(select_model)
-			raw=cur.fetchone()
-			unpickling_model=[]
-			for unpickling in raw:
-				unpickling_model.append(unpickling)
-			loadmodel=pickle.loads(b"".join(unpickling_model))
-			vectorize_message = Vectorizer.transform([d])
-			predict = loadmodel.predict(vectorize_message)[0]
-			predict_proba = loadmodel.predict_proba(vectorize_message).tolist()
+			cur.execute(select_vectorizer)
+			vectorizer=cur.fetchone()
+			unpickling_vectorizer=[]
+			for unvect in vectorizer:
+				unpickling_vectorizer.append(unvect)
+			cur.execute(select_classifier)
+			classifier=cur.fetchone()
+			unpickling_classifier=[]
+			for unclassy in classifier:
+				unpickling_classifier.append(unclassy)
+			loadvectorizer=pickle.loads(b"".join(unpickling_vectorizer))
+			loadclassifier=pickle.loads(b"".join(unpickling_classifier))
+			vectorize_message = loadvectorizer.transform([d])
+			predict = loadclassifier.predict(vectorize_message)[0]
+			predict_proba = loadclassifier.predict_proba(vectorize_message).tolist()
 	except BaseException as inst:
 		error = str(type(inst).__name__) + ' ' + str(inst)
 	return jsonify(message=message, predict_proba=predict_proba,
