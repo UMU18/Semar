@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import re
 import string
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
-
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 app = Flask(__name__) #create an instance of the Flask library
