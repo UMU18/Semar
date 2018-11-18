@@ -7,15 +7,4 @@ sastrawi==1.0.1
 scikit-learn==0.19.1
 scipy==1.1.0
 numpy==1.15.1
-APScheduler==3.5.3
-newrelic==4.4.1.104
 
-
-
-
-
-<<<<<<< HEAD
-
-
-=======
->>>>>>> a78e43b25aaac43470c8ebe0612b7a426600f28f
