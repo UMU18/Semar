@@ -17,15 +17,6 @@ DATABASE_URL = os.environ['DATABASE_URL']
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 engine = create_engine(os.environ['DATABASE_URL'])
 
-#read dictionary
-def words(text): return re.findall(r'\w+', text.lower())
-
-WORDS = Counter(words(open('spellcheck.txt').read()))
-ROOTWORDS = Counter(words(open('kata-dasar.txt').read()))
-STOPWORDS = Counter(words(open('stopword.txt').read()))
-
-
-
 #perform learning
 Classifier = OneVsRestClassifier(SVC(kernel='linear', probability=True))
 Vectorizer = TfidfVectorizer()
